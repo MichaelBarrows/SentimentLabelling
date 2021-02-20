@@ -1,0 +1,33 @@
+# File containing dataset paths, and output paths.
+# To get started:
+#   add the path to your datasets in to the "datasets" variable
+#   add the path for your output data to the "output_data" variable
+#   add the relative path (relative to "dataset" variable) for each of the files.
+#     example:
+#       dataset = "/home/user/iran_datasets"
+#       oct_18 = "18_10/iran_tweets_1.csv"
+
+# Path to original Twitter Election Integrity Datasets
+dataset = ""
+# Path to output data storage folder
+output_data = ""
+
+# Relative path within dataset folder to 10_18 release file
+oct_18 = ""
+oct_18_list = [oct_18]
+
+# Relative path within dataset folder to 01_19 release files
+jan_19_1 = ""
+jan_19_2 = ""
+jan_19_3 = ""
+jan_19_4 = ""
+jan_19_list = [jan_19_1, jan_19_2, jan_19_3, jan_19_4]
+
+# Relative path within dataset folder to 06_19 release files
+jun_19_1 = ""
+jun_19_2 = ""
+jun_19_3 = ""
+jun_19_list = [jun_19_1, jun_19_2, jun_19_3]
+
+# list containing all file paths for all datasets
+all_datasets = oct_18_list + jan_19_list + jun_19_list
