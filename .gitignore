@@ -2,3 +2,5 @@ dataset.py
 __pycache__
 helpers.pyc
 NRC-Emotion-Lexicon
+output_data
+data

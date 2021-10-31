@@ -11,6 +11,8 @@ import pandas as pd
 
 stemmer = PorterStemmer()
 
+df = ''
+
 # hold the counts for each sentiment category (overall)
 score_counter = {"Positive": 0,
                  "Negative": 0,
@@ -269,7 +271,7 @@ def sentiwordnet_processing (synsets):
 # parameters:
 #   None
 # returns:
-#   None
+#   df : DataFrame - the updated DataFrame with sentiment information
 # description:
 #   This function imports the dataset of tweets, iterates over them, tokenises
 #       and gets POS tags (and converts to WordNet POS tags) for each word and
@@ -281,6 +283,7 @@ def sentiwordnet_processing (synsets):
 #       category are printed.
 def dataset_processing ():
     global score_counter
+    global df
     df = helpers.load_dataset(ds.dataset)
     df['sentiment_class'] = ""
     df['positive_score'] = ""
@@ -318,20 +321,32 @@ def dataset_processing ():
 
     for ix in score_counter:
         print(ix, score_counter[ix])
-    helpers.path_checker(ds.output_data)
-    helpers.dataframe_to_csv(df, ds.output_data + "/sentiwordnet_labelled.csv")
+    return df
 
 # run()
 # parameters:
 #   None
 # returns:
-#   None
+#   df : DataFrame - dataframe with sentiment information
 # description:
 #   This function prints a message explaining what is happening and calls the
 #       dataset_processing() function to execute the code
 def run ():
     print("Running SentiWordNet Labelling")
-    dataset_processing()
+    df = dataset_processing()
+    store_dataset(df)
+    return df
 
-# Execute the code
-run()
+# store_dataset()
+# parameters:
+#   df : DataFrame - the dataframe to be stored
+# returns:
+#   None
+# description:
+#   This function stores the dataframe in a CSV file
+def store_dataset(df):
+    helpers.path_checker(ds.output_data)
+    helpers.dataframe_to_csv(df, '/' + ds.output_data + "/sentiwordnet_labelled.csv")
+
+# dataframe - just in case something goes wrong with storing it
+processed_df = run()
