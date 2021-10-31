@@ -12,7 +12,6 @@ This project aims to label Iranian state-sponsored propaganda for sentiment and 
 <h3>About</h3>
 <hr style="margin:10px 0;padding:0;"/>
 
-<<<<<<< HEAD
 This code:
 * Identifies WordNet synsets for each word in a given tweet
 * Performs Word Sense Disambiguation (WSD) by comparing each tweet word to each word in each synset definition to identify the most appropriate synset
@@ -20,9 +19,6 @@ This code:
 * Assigns a sentiment label of either Positive, Neutral or Negative to the tweet
 * Calculates the objectivity of the tweet
 * Generates a Match Percentage Threshold (MPT) metric for determining the number of matches between the tweet and the SentiWordNet lexicon
-=======
-##### What is this code supposed to do?
->>>>>>> added all files - WIP
 
 <h3>Prerequisites</h3>
 <hr style="margin:10px 0;padding:0;"/>
