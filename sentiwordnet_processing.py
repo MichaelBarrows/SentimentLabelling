@@ -6,7 +6,7 @@ from nltk.corpus import wordnet as wn
 from nltk.corpus import sentiwordnet as swn
 import re
 from operator import itemgetter
-import negation
+# import negation
 import pandas as pd
 
 stemmer = PorterStemmer()
@@ -53,8 +53,6 @@ def stemming (word):
 #   The synset_match_sorter() function is then called to identify the best match
 #       to be returned.
 def synset_matching (word, pos, tweet_text, original_text):
-    if negation.check(word):
-        return "flip.negate"
     if pos != None:
         all_synsets = wn.synsets(word, pos)
     else:
@@ -98,23 +96,48 @@ def synset_matching (word, pos, tweet_text, original_text):
 #       - highest count
 #       - default/fallback
 def synset_match_sorter (matches, first_synset):
-    matches = sorted(matches.items(), key=itemgetter(1), reverse=True)
-    top_match_percentage = None
-    top_match_count = None
-    top_synset = None
+    if len(matches) == 0:
+        return None
+    matches_list = []
+    for item in matches:
+        matches_list.append([item, matches[item][0], matches[item][1]])
+    matches = sorted(matches_list, key = lambda x: x[1], reverse = True)
+    first = True
+    top_match = [None, None, None]
     for match in matches:
-        if top_match_count == None:
-            top_match_percentage = match[1][0]
-            top_match_count = match[1][1]
-            top_synset = match[0]
-        elif top_match_percentage == None and match[1][0] == 0.0:
-            top_synset = first_synset
-        elif top_match_percentage == match[1][0]:
-            if match[1][1] > top_match_count:
-                top_synset = match[0]
+        if first == True:
+            top_match = [match[0], match[1], match[2]]
+            first = False
+            continue
         else:
-            break
-    return top_synset
+            if match[1] > top_match[1]:
+                top_match = [match[0], match[1], match[2]]
+            elif match[1] == top_match[1]:
+                if match[2] > top_match[2]:
+                     top_match = [match[0], match[1], match[2]]
+    return top_match[0]
+
+
+    # matches = sorted(matches.items(), key=itemgetter(1), reverse=True)
+    # top_match_percentage = None
+    # top_match_count = None
+    # top_synset = None
+    # for match in matches:
+    #     if top_match_count == None:
+    #         top_match_percentage = match[1][0]
+    #         top_match_count = match[1][1]
+    #         top_synset = match[0]
+    #     elif top_match_percentage == None and match[1][0] == 0.0:
+    #         top_synset = first_synset
+    #     elif top_match_percentage == match[1][0]:
+    #         if match[1][1] > top_match_count:
+    #             top_synset = match[0]
+    #     else:
+    #         break
+    # return top_synset
+
+
+
 
 # definition_match_checker()
 # parameters:
@@ -167,7 +190,8 @@ def remove_special_chars (text):
                           ['(', '\('],
                           [')', '\)'],
                           ['&amp;', '\&amp;'],
-                          ['rt'],
+                          ['amp '],
+                          ['rt '],
                           ['&gt;', '\&gt;'],
                           ['&lt;', '\&lt;'],
                           ['&', '\&'],
@@ -217,24 +241,10 @@ def sentiwordnet_processing (synsets):
     if len(synsets) == 0:
         return
     for wn_synset in synsets:
-        if wn_synset == "flip.negate":
-            negate_flag = True
-            continue
         synset = swn.senti_synset(wn_synset)
-        if negate_flag == False:
-            pos_score += synset.pos_score()
-            neg_score += synset.neg_score()
-        elif negate_flag == True:
-            pos_score += synset.neg_score()
-            neg_score += synset.pos_score()
-            # negate_flag = False
+        pos_score += synset.pos_score()
+        neg_score += synset.neg_score()
         obj_score += synset.obj_score()
-    # used only if flipping next word
-    # if negate_flag == True:
-    #     synset = swn.senti_synset('not.r.01')
-    #     pos_score += synset.pos_score()
-    #     neg_score += synset.neg_score()
-    #     obj_score += synset.obj_score()
     pos_score = pos_score / len(synsets)
     neg_score = neg_score / len(synsets)
     obj_score = obj_score / len(synsets)
@@ -271,7 +281,7 @@ def sentiwordnet_processing (synsets):
 #       category are printed.
 def dataset_processing ():
     global score_counter
-    df = helpers.load_dataset(ds.dataset + ds.data)
+    df = helpers.load_dataset(ds.dataset)
     df['sentiment_class'] = ""
     df['positive_score'] = ""
     df['negative_score'] = ""
@@ -280,9 +290,7 @@ def dataset_processing ():
     df['words_matched_percentage'] = ""
     word_dict = {}
     pos_dict = {}
-    print_flag = False
     for index, row in df.iterrows():
-        negation_flag = False
         if index % 100 == 0:
             print("    -", str(index), "/", str(len(df)))
         stemmed_preprocessed_text = []
@@ -291,9 +299,6 @@ def dataset_processing ():
         tweet_text = word_tokenize(tweet_text)
         words_with_pos = pos_tag(tweet_text)
         for word, pos in words_with_pos:
-            if negation.check(word):
-                negation_flag = True
-                print_flag = True
             word_synset = synset_matching(word, pos_tag_conversion(pos), tweet_text, row.tweet_text)
             if word_synset != None:
                 synsets.append(word_synset)
@@ -310,14 +315,11 @@ def dataset_processing ():
             df.words_matched_percentage.at[index] = round(100 * len(synsets) / len(tweet_text), 2)
         else:
             df.words_matched_percentage.at[index] = 0
-        if print_flag == True:
-            print(sent_class, row.preprocessed_tweet_text)
-            print_flag = False
-
 
     for ix in score_counter:
         print(ix, score_counter[ix])
-    helpers.dataframe_to_csv(df, ds.output_data + "sentiwordnet_labelled.csv")
+    helpers.path_checker(ds.output_data)
+    helpers.dataframe_to_csv(df, ds.output_data + "/sentiwordnet_labelled.csv")
 
 # run()
 # parameters:
