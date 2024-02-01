@@ -3,6 +3,8 @@
 
 This code is part of the research project titled "Iranian State-Sponsored Propaganda on Twitter: Exploring Methods for Automatic Classification and Analysis".
 
+The results are published in a paper titled "Sentiment and Objectivity in Iranian State-Sponsored Propaganda on Twitter" in IEEE Transactions on Computational Social Systems at [doi.org/10.1109/TCSS.2023.3273729](https://doi.org/10.1109/TCSS.2023.3273729)
+
 <h3>Project</h3>
 <hr style="margin:10px 0;padding:0;"/>
 
